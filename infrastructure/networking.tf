@@ -277,3 +277,73 @@ resource "aws_key_pair" "orchestration_key" {
   key_name = "kubernetes-key" 
   public_key = "${var.public_key}"
 }
+
+# 2 controllers
+#
+# CONTROLLER_1_INSTANCE_ID=$(aws ec2 run-instances \
+#   --associate-public-ip-address \
+#   --iam-instance-profile 'Name=kubernetes' \
+#   --image-id ${IMAGE_ID} \
+#   --count 1 \
+#   --key-name kubernetes \
+#   --security-group-ids ${SECURITY_GROUP_ID} \
+#   --instance-type t2.small \
+#   --private-ip-address 10.240.0.11 \
+#   --subnet-id ${SUBNET_ID} | \
+#   jq -r '.Instances[].InstanceId')
+# aws ec2 modify-instance-attribute \
+#   --instance-id ${CONTROLLER_1_INSTANCE_ID} \
+#   --no-source-dest-check
+# aws ec2 create-tags \
+#   --resources ${CONTROLLER_1_INSTANCE_ID} \
+#   --tags Key=Name,Value=controller1
+resource "aws_instance" "orchestration_control" {
+    count = 2
+    associate_public_ip_address = true
+    iam_instance_profile = "kubernetes"
+    ami = "${var.image_id}" 
+    key_name = "kubernetes"
+    security_groups = ["aws_security_group.orchestration_fw.id"]
+    instance_type = "t2.small"
+    private_ip = "${lookup(var.controller_instance_ips, count.index)}"
+    subnet_id = "${aws_subnet.orchestration_subnet.id}"
+    source_dest_check = false
+    tags {
+        Name = "${lookup(var.controller_instance_names, count.index)}"
+    }
+}
+
+# 3 workers
+#
+# WORKER_0_INSTANCE_ID=$(aws ec2 run-instances \
+#   --associate-public-ip-address \
+#   --iam-instance-profile 'Name=kubernetes' \
+#   --image-id ${IMAGE_ID} \
+#   --count 1 \
+#   --key-name kubernetes \
+#   --security-group-ids ${SECURITY_GROUP_ID} \
+#   --instance-type t2.small \
+#   --private-ip-address 10.240.0.20 \
+#   --subnet-id ${SUBNET_ID} | \
+#   jq -r '.Instances[].InstanceId')
+# aws ec2 modify-instance-attribute \
+#   --instance-id ${WORKER_0_INSTANCE_ID} \
+#   --no-source-dest-check
+# aws ec2 create-tags \
+#   --resources ${WORKER_0_INSTANCE_ID} \
+#   --tags Key=Name,Value=worker0
+resource "aws_instance" "orchestration_worker" {
+    count = 3
+    associate_public_ip_address = true
+    iam_instance_profile = "kubernetes"
+    ami = "${var.image_id}" 
+    key_name = "kubernetes"
+    security_groups = ["aws_security_group.orchestration_fw.id"]
+    instance_type = "t2.small"
+    private_ip = "${lookup(var.worker_instance_ips, count.index)}"
+    subnet_id = "${aws_subnet.orchestration_subnet.id}"
+    source_dest_check = false
+    tags {
+        Name = "${lookup(var.worker_instance_names, count.index)}"
+    }
+}
