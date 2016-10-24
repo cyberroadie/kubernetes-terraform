@@ -132,7 +132,9 @@ resource "aws_security_group" "orchestration_fw" {
     #   --group-id ${SECURITY_GROUP_ID} \
     #   --protocol all
     ingress {
-        protocol = "all"
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
     }
 
     # aws ec2 authorize-security-group-ingress \
@@ -142,8 +144,8 @@ resource "aws_security_group" "orchestration_fw" {
     #   --cidr 10.240.0.0/16
     ingress {
         from_port = 0
-        to_port = 65535
-        protocol = "all"
+        to_port = 0
+        protocol = "-1"
         cidr_blocks = ["10.240.0.0/16"]
     }
 
@@ -154,7 +156,7 @@ resource "aws_security_group" "orchestration_fw" {
     #   --cidr 0.0.0.0/0
     ingress {
         from_port = 0
-        to_port = 65535
+        to_port = 0
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -193,7 +195,7 @@ resource "aws_elb" "orchestration_fw_elb" {
     }
 
     subnets = ["${aws_subnet.orchestration_subnet.id}"]
-    security_groups = ["aws_security_group.orchestration_fw.id"]
+    security_groups = ["${aws_security_group.orchestration_fw.id}"]
 
 }
 
@@ -237,7 +239,7 @@ EOF
 #   --policy-document file://kubernetes-iam-policy.json
 resource "aws_iam_role_policy" "orchestration_policy" {
     name = "kubernetes"
-    role = "kubernetes"
+    role = "${aws_iam_role.orchestration_role.id}"
     policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -274,7 +276,7 @@ resource "aws_iam_instance_profile" "orchestration_profile" {
 # once generated copy the public key int the public_key 
 # variable
 resource "aws_key_pair" "orchestration_key" {
-  key_name = "kubernetes-key" 
+  key_name = "kubernetes" 
   public_key = "${var.public_key}"
 }
 
@@ -303,13 +305,13 @@ resource "aws_instance" "orchestration_control" {
     iam_instance_profile = "kubernetes"
     ami = "${var.image_id}" 
     key_name = "kubernetes"
-    security_groups = ["aws_security_group.orchestration_fw.id"]
+    security_groups = ["${aws_security_group.orchestration_fw.id}"]
     instance_type = "t2.small"
-    private_ip = "${lookup(var.controller_instance_ips, count.index)}"
+    private_ip = "${element(values(var.controller_instance_ips), count.index)}"
     subnet_id = "${aws_subnet.orchestration_subnet.id}"
     source_dest_check = false
     tags {
-        Name = "${lookup(var.controller_instance_names, count.index)}"
+        Name = "${element(values(var.controller_instance_names), count.index)}"
     }
 }
 
@@ -338,12 +340,12 @@ resource "aws_instance" "orchestration_worker" {
     iam_instance_profile = "kubernetes"
     ami = "${var.image_id}" 
     key_name = "kubernetes"
-    security_groups = ["aws_security_group.orchestration_fw.id"]
+    security_groups = ["${aws_security_group.orchestration_fw.id}"]
     instance_type = "t2.small"
-    private_ip = "${lookup(var.worker_instance_ips, count.index)}"
+    private_ip = "${element(values(var.worker_instance_ips), count.index)}"
     subnet_id = "${aws_subnet.orchestration_subnet.id}"
     source_dest_check = false
     tags {
-        Name = "${lookup(var.worker_instance_names, count.index)}"
+        Name = "${element(values(var.worker_instance_names), count.index)}"
     }
 }

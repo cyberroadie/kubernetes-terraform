@@ -5,3 +5,4 @@ packer_cache/
 *.box
 
 .aws_secret
+kubernetes.pem
