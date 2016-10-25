@@ -280,7 +280,7 @@ resource "aws_key_pair" "orchestration_key" {
   public_key = "${var.public_key}"
 }
 
-# 2 controllers
+# 3 controllers
 #
 # CONTROLLER_1_INSTANCE_ID=$(aws ec2 run-instances \
 #   --associate-public-ip-address \
@@ -300,7 +300,7 @@ resource "aws_key_pair" "orchestration_key" {
 #   --resources ${CONTROLLER_1_INSTANCE_ID} \
 #   --tags Key=Name,Value=controller1
 resource "aws_instance" "orchestration_control" {
-    count = 2
+    count = 3
     associate_public_ip_address = true
     iam_instance_profile = "kubernetes"
     ami = "${var.image_id}" 

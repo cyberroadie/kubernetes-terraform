@@ -8,15 +8,17 @@ variable "image_id"  {
 
 variable "controller_instance_ips" { 
   default = {
-    "0" = "10.240.0.11"
-    "1" = "10.240.0.12"
+    "0" = "10.240.0.10"
+    "1" = "10.240.0.11"
+    "2" = "10.240.0.12"
   }
 }
 
 variable  "controller_instance_names" {
   default = {
-    "0" = "controller1"
-    "1" = "controller2"
+    "0" = "controller0"
+    "1" = "controller1"
+    "2" = "controller2"
   }
 }
 
