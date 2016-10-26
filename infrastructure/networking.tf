@@ -135,6 +135,7 @@ resource "aws_security_group" "orchestration_fw" {
         from_port = 0
         to_port = 0
         protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
     }
 
     # aws ec2 authorize-security-group-ingress \
@@ -155,8 +156,8 @@ resource "aws_security_group" "orchestration_fw" {
     #   --port 22 \
     #   --cidr 0.0.0.0/0
     ingress {
-        from_port = 0
-        to_port = 0
+        from_port = 22
+        to_port = 22
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -167,9 +168,16 @@ resource "aws_security_group" "orchestration_fw" {
     #   --port 6443 \
     #   --cidr 0.0.0.0/0    
     ingress {
-        from_port = 0
+        from_port = 6443
         to_port = 6443
         protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"   
         cidr_blocks = ["0.0.0.0/0"]
     }
 
@@ -270,7 +278,8 @@ resource "aws_iam_instance_profile" "orchestration_profile" {
 # ssh-add ~/.ssh/kubernetes_the_hard_way 
 #
 # WARNING: Terraform can not create key-pairs
-# instead we add a public key to vars.tfvars
+# instead we create a key via the web interface
+# download the key and add the public key to vars.tf
 # 
 # keys can be generated with ssh-keygen
 # once generated copy the public key int the public_key 
@@ -313,6 +322,16 @@ resource "aws_instance" "orchestration_control" {
     tags {
         Name = "${element(values(var.controller_instance_names), count.index)}"
     }
+
+    # Install Python so we can run ansible. Go is always good to have too.
+    provisioner "remote-exec" {
+        inline = [
+            "sudo apt-get update",
+            "sudo apt-get update -y",
+            "sudo apt-get -y install python golang",
+        ]
+    }
+
 }
 
 # 3 workers
@@ -347,5 +366,14 @@ resource "aws_instance" "orchestration_worker" {
     source_dest_check = false
     tags {
         Name = "${element(values(var.worker_instance_names), count.index)}"
+    }
+
+    # Install Python so we can run ansible. Go is always good to have too.
+    provisioner "remote-exec" {
+        inline = [
+            "sudo apt-get update",
+            "sudo apt-get update -y",
+            "sudo apt-get -y install python golang",
+        ]
     }
 }
