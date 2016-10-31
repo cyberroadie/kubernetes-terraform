@@ -42,5 +42,32 @@ To get usefull info (like public IPs) run:
 
     $ terraform output -json
 
-## Kubernetes VMs Provisioning
+## Setting up a CA and TLS Cert Generation
+Create Certificate Authority and Certificates
+
+    $ ./01_create_ca.sh
+    $ ./02_create_csr_json.sh
+    $ ./03_create_cert.sh
+    $ ./04_copy_cert_keys.sh
+
+## Bootstrapping an H/A etcd cluster
+
+
+## Bootstrapping an H/A Kubernetes Control Plane
+
+
+## Bootstrapping Kubernetes Workers
+
+
+## Configuring the Kubernetes Client - Remote Access
+
+
+## Managing the Container Network Routes
+
+
+## Deploying the Cluster DNS Add-on
+
+
+## Smoke Test
+
 
