@@ -6,3 +6,6 @@ packer_cache/
 
 .aws_secret
 kubernetes.pem
+
+# terraform
+*.tfsate
