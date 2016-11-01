@@ -1,7 +1,3 @@
-variable "public_key" {
-  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDT3+M6HxfarenN84QSW/nuYUVmvUNxcW7NlisvoE+jTd+rVDml0wuB/cguDaxThw2t0ee07T++lpPIlzAXlW1vY3h5DDVw26rgoZVHEWQa5sD96mjwJL4Ip7D8+wtumyTAP7yfuXGv6qjLguoh6cJ6WYyKuYMvXrZZu49ZAPA7fTck4Tb+2Y/jS+16M9g4NvnprOFu0yjm6QcWGxPvvEUoa42kCedUw6/c+fAZir6/mqYZnNp/4wWgrbDG+pwV2dBRES9Ieqlg8oOgkdzo9vXzV3Vm3bULBr5HHOdYONpDM8m1MlBeXjSL7/9So672JR3GN0sMImQNy89j0K9Zp5t3"
-}
-
 variable "image_id"  {
   default = "ami-746aba14"
 }

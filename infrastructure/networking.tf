@@ -278,15 +278,16 @@ resource "aws_iam_instance_profile" "orchestration_profile" {
 # ssh-add ~/.ssh/kubernetes_the_hard_way 
 #
 # WARNING: Terraform can not create key-pairs
-# instead we create a key via the web interface
-# download the key and add the public key to vars.tf
+# instead we create a key via the web interface:
+# https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#KeyPairs:sort=keyName
 # 
-# keys can be generated with ssh-keygen
-# once generated copy the public key int the public_key 
-# variable
+# download the key and create a public key:
+# chmod 0600 ../kubernetes.pem 
+# ssh-keygen -y -f ../kubernetes.pem > ../kubernetes.pub 
+# ssh-add ../kubernetes.pem
 resource "aws_key_pair" "orchestration_key" {
   key_name = "kubernetes" 
-  public_key = "${var.public_key}"
+  public_key = "${file("kubernetes.pub")}"
 }
 
 # 3 controllers
@@ -328,8 +329,14 @@ resource "aws_instance" "orchestration_control" {
         inline = [
             "sudo apt-get update",
             "sudo apt-get update -y",
-            "sudo apt-get -y install python golang",
+            "sudo apt-get -y install python golang"
         ]
+
+        connection {
+           user = "ubuntu"
+           private_key = "${file("kubernetes.pem")}"
+        }
+
     }
 
 }
@@ -373,7 +380,12 @@ resource "aws_instance" "orchestration_worker" {
         inline = [
             "sudo apt-get update",
             "sudo apt-get update -y",
-            "sudo apt-get -y install python golang",
+            "sudo apt-get -y install python golang"
         ]
+
+        connection {
+           user = "ubuntu"
+           private_key = "${file("kubernetes.pem")}"
+        }
     }
 }
